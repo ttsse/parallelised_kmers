@@ -1,3 +1,6 @@
+# 14 jul executed
+- setup base code for data import and added unit test for data import 
+
 # 14 jul plan
 - write bash script that generates other bash scripts
 	- generation is dependendent on specific input file (kmer_count or binary, across three kmer sizes)
