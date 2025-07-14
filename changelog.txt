@@ -1,0 +1,15 @@
+# 14 jul plan
+- write bash script that generates other bash scripts
+	- generation is dependendent on specific input file (kmer_count or binary, across three kmer sizes)
+	- to run for different method
+- write test scripts
+	- make git issue for this first!
+	- test for spurious input via unit test
+		- files that do not exist
+- ensure environment file is fulfilled
+	- make got issue for this as well!
+
+# next steps
+- run code and record performance
+- compare against nextflow pipeline maybe in secondary branch
+	- or with raytune
