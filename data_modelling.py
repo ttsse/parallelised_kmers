@@ -10,6 +10,8 @@ import warnings
 from sklearn.exceptions import DataConversionWarning
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 warnings.filterwarnings(action='ignore', category=DeprecationWarning)
+import time
+import tracemalloc
 
 
 filepath = os.getcwd() + '/data/'
@@ -22,6 +24,9 @@ class results_gen():
         self.X_test = None
         self.y_test = None
         self.model = None
+        self.method = None
+        self.training_time = None
+        self.max_memory = None
 
     # step 1: data import 
         ## unit tests written
@@ -56,15 +61,24 @@ class results_gen():
         k = self.k
         predicting = self.predicting
         method='l2'
+        self.method = method
         
+        start_time = time.time()
+        tracemalloc.start()
         model = LogisticRegression(max_iter = 1000) # default is l2
         ovo = OneVsOneClassifier(model)
         LRparam_grid = {
             'estimator__C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]
             }
-        ovo_tuned = GridSearchCV(estimator = ovo, param_grid = LRparam_grid, refit=True, cv=10, verbose=1, scoring='balanced_accuracy', n_jobs = -1)
+        ovo_tuned = GridSearchCV(estimator = ovo, param_grid = LRparam_grid, refit=True, cv=10, verbose=0, scoring='balanced_accuracy', n_jobs = -1)
         ovo_tuned.fit(X_train, y_train)
         self.model = ovo_tuned
+        end_time = time.time()
+        current_mem, peak_mem = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        seconds_spanned_training = end_time - start_time
+        self.training_time = seconds_spanned_training
+        self.max_memory = peak_mem
         return ovo_tuned 
 
     def modelTesting(self):
@@ -114,5 +128,22 @@ class results_gen():
 
         joblib.dump(ovo_tuned.best_estimator_, os.getcwd()+'/models/k'+k+'_'+kmer+'_'+predicting+'_'+method+'.joblib')
 
-#case = results_gen('all', '17', 'absence')
-#case.modelTraining()
+    def performanceMetrics(self):
+        kmer = self.kmer
+        k = self.k
+        predicting = self.predicting
+        training_time = self.training_time
+        max_training_memory = self.max_memory
+        method = self.method
+
+        performance_metrics_path = os.getcwd() + '/models/performance/'
+        if os.path.exists(performance_metrics_path):
+            pass
+        else:
+            os.makedirs(performance_metrics_path)
+        performance_metrics_results_path = performance_metrics_path + 'k'+k+'_'+kmer+'_'+predicting+'_'+method+'.csv'
+        perf_dict = {'k': [k], 'kmer': [kmer], 'predicting': [predicting], 'method': [method], 'training_time': [training_time], 'max_training_memory': [max_training_memory]}
+        df = pd.DataFrame(perf_dict)
+        df.to_csv(performance_metrics_results_path, header=True)
+
+        return [training_time, max_training_memory]
