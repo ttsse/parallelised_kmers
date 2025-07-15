@@ -85,7 +85,7 @@ class results_gen():
         kmer = self.kmer
         k = self.k
         predicting = self.predicting
-        method='l2'
+        method = self.method
         ovo_tuned = self.modelTraining()
         X_test = self.X_test
         y_test = self.y_test
