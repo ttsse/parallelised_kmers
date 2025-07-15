@@ -9,6 +9,8 @@ import joblib
 import warnings
 from sklearn.exceptions import DataConversionWarning
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
+warnings.filterwarnings(action='ignore', category=DeprecationWarning)
+
 
 filepath = os.getcwd() + '/data/'
 
@@ -17,6 +19,9 @@ class results_gen():
         self.kmer = kmer
         self.k = k
         self.predicting = predicting
+        self.X_test = None
+        self.y_test = None
+        self.model = None
 
     # step 1: data import 
         ## unit tests written
@@ -35,7 +40,10 @@ class results_gen():
             X_test= pd.read_csv(x_test_path, index_col=0)
             y_train = pd.read_csv(y_train_path, index_col=0)
             y_test = pd.read_csv(y_test_path, index_col=0)
-            return X_train, X_test, y_train, y_test
+
+            self.y_test = y_test
+            self.X_test = X_test
+            return X_train, y_train
 
         except FileNotFoundError as error:
             raise FileNotFoundError(error)
@@ -43,7 +51,7 @@ class results_gen():
     # step 2: model training
         ## ovo and l2
     def modelTraining(self):
-        X_train, X_test, y_train, y_test = self.dataImport()
+        X_train, y_train = self.dataImport()
         kmer = self.kmer
         k = self.k
         predicting = self.predicting
@@ -56,6 +64,18 @@ class results_gen():
             }
         ovo_tuned = GridSearchCV(estimator = ovo, param_grid = LRparam_grid, refit=True, cv=10, verbose=1, scoring='balanced_accuracy', n_jobs = -1)
         ovo_tuned.fit(X_train, y_train)
+        self.model = ovo_tuned
+        return ovo_tuned 
+
+    def modelTesting(self):
+        kmer = self.kmer
+        k = self.k
+        predicting = self.predicting
+        method='l2'
+        ovo_tuned = self.modelTraining()
+        X_test = self.X_test
+        y_test = self.y_test
+        
         df = pd.DataFrame(ovo_tuned.cv_results_)
         cross_validation_results_parent_path = os.getcwd() + '/models/hyperparams/'
         if os.path.exists(cross_validation_results_parent_path):
