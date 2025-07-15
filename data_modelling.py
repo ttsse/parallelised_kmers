@@ -54,7 +54,7 @@ class results_gen():
             raise FileNotFoundError(error)
     
     # step 2: model training
-        ## ovo and l2
+        ## svm
     def modelTraining(self):
         X_train, y_train = self.dataImport()
         kmer = self.kmer
