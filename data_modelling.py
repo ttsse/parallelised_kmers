@@ -151,6 +151,3 @@ class results_gen():
         df.to_csv(performance_metrics_results_path, header=True)
 
         return [training_time, max_training_memory]
-    
-case = results_gen('all', '17', 'absence')
-case.modelTesting()
