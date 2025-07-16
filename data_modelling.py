@@ -88,9 +88,9 @@ class results_gen():
     def modelTesting(self):
         kmer = self.kmer
         k = self.k
-        predicting = self.predicting
-        method= self.method
+        predicting = self.predicting 
         ovo_tuned = self.modelTraining()
+        method= self.method
         X_test = self.X_test
         y_test = self.y_test
         
@@ -151,3 +151,6 @@ class results_gen():
         df.to_csv(performance_metrics_results_path, header=True)
 
         return [training_time, max_training_memory]
+    
+case = results_gen('all', '17', 'absence')
+case.modelTesting()
