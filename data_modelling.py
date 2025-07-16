@@ -81,6 +81,34 @@ class results_gen():
         self.max_memory = peak_mem
         return ovo_tuned 
 
+    # step 2: model training
+        ## with l1 regularization
+    def L1modelTraining(self):
+        X_train, y_train = self.dataImport()
+        kmer = self.kmer
+        k = self.k
+        predicting = self.predicting
+        method= 'l1'
+        self.method = method
+
+        start_time = time.time()
+        tracemalloc.start()
+        model = LogisticRegression(penalty='l1', solver='liblinear', max_iter = 1000)
+        ovo = OneVsOneClassifier(model)
+        LRparam_grid = {
+            'estimator__C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]
+            }
+        ovo_tuned = GridSearchCV(estimator = ovo, param_grid = LRparam_grid, refit=True, cv=10, verbose=0, scoring='balanced_accuracy', n_jobs = -1)
+        ovo_tuned.fit(X_train, y_train)
+        self.model = ovo_tuned        
+        end_time = time.time()
+        current_mem, peak_mem = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        seconds_spanned_training = end_time - start_time
+        self.training_time = seconds_spanned_training
+        self.max_memory = peak_mem
+        return ovo_tuned 
+
     def modelTesting(self):
         kmer = self.kmer
         k = self.k
